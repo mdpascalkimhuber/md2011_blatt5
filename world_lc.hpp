@@ -3,6 +3,7 @@
 
 #include "world.hpp"
 #include "cell.hpp"
+#include "subdomain.hpp"
 #include <list>
 
 
@@ -76,6 +77,9 @@ public:
   int thermostat_target_temperature;
   // Initializing of the random values
   int random_seed;
+
+  /// additional data structure for parallelization
+  SubDomain s; 
 };
 
 std::ostream& operator << (std::ostream& os, World_LC& W);

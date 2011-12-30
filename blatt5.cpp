@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstdio>
+#include <mpi.h>
 
 #include "world_lc.hpp"
 #include "gravitypotential.hpp"
@@ -20,6 +21,23 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  // instanciate variables for parallelization
+  int myrank, numprocs; 
+
+  // initialize MPI
+  MPI::Init(argc, argv); 
+  
+  // determine number and id of process(es)
+  numprocs = MPI::COMM_WORLD.Get_size(); 
+  myrank = MPI::COMM_WORLD.Get_rank(); 
+
+  /*--------------------------------------------------------------------------------
+    Calculations for the SubDomain
+    --------------------------------------------------------------------------------*/
+
+  // terminate MPI
+  MPI::Finalize(); 
+  
   // instantiate Potential
   LJ_Potential Pot(2.5);
 
