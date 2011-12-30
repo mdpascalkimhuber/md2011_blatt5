@@ -9,10 +9,10 @@
 MAIN = blatt5
 
 # define the C source files
-SRCS = blatt5.cpp world.cpp timediscretization.cpp gravitypotential.cpp velocityverlet.cpp observer.cpp particle.cpp ljpotential.cpp world_lc.cpp cell.cpp velocityverlet_lc.cpp potential.cpp observerxyz_lc.cpp observerxyz.cpp
+SRCS = blatt5.cpp world.cpp timediscretization.cpp gravitypotential.cpp velocityverlet.cpp observer.cpp particle.cpp ljpotential.cpp world_lc.cpp cell.cpp velocityverlet_lc.cpp potential.cpp observerxyz_lc.cpp observerxyz.cpp subdomain.cpp
 
 # define the C compiler to use
-CC = g++
+CC = mpic++
 
 # define any compile-time flags
 CFLAGS = -Wall -g
