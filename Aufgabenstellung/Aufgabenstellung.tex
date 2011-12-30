@@ -1,0 +1,43 @@
+%--------------------------------------------------------------------------------
+\documentclass{article}
+\usepackage[latin1]{inputenc}
+%--------------------------------------------------------------------------------
+
+\begin{document}
+
+\section{Einzuführende Strukturen}
+\subsection{Klasse für Teilgebiete}
+Führe die Klasse
+\begin{itemize}
+\item \texttt{class SubDomain\{...\}}
+\end{itemize}
+ein. 
+In diser soll die Prozessnummer, die Anzahl der gestarteten Prozesse,
+die Position des Prozesses im Prozessgitter (\texttt{ip[DIM])}), die
+Anzahl der Teilgebiete, die Prozessnummern der Nachbarprozesse
+(\texttt{ip\_lower[DIM], ip\_upper[DIM]}), die Breite der Randbordüre
+(\texttt{ic\_start[DIM]}), der erste lokale Index in der oberen
+Randbordüre (\texttt{ic\_stop[DIM]}), die Anzahl der Zellen im gesamten
+Teilgebiet einschließlich der Randbordüren, die Kantenlänge der Zellen
+und der globale Index der ersten Zelle des Teilgebiets
+(\texttt{ic\_lower\_global[DIM]}) gespeichert sein. 
+
+Dazu muss folgendes Bestimmt werden: 
+
+\begin{itemize}
+\item Die globalen Zellindizes des Teilgebietes müssen bestimmt
+  werden. 
+\item Die Position im Prozessgitter muss berechnet werden.
+\item In Abhängigkeit von der Randbedingungen müssen die
+  Prozessnummern der Nachbarprozesse bestimmt werden. 
+\item Die Zahl der Zellen muss bestimmt werden. 
+\item Die Prozesse müssen auf die Teilgebiete verteilt werden und die
+  Position im Prozessgitter muss mit der Prozessnummer
+  (\texttt{myrank}) in Zusammenhang gebracht werden. 
+\end{itemize}
+
+
+
+
+
+\end{document}
