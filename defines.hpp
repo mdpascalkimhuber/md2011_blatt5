@@ -1,26 +1,28 @@
 /** \mainpage MD Praktikum 2011
  *
- * \section blatt3_sec Übungsblatt 3
+ * \section blatt5_sec Übungsblatt 5
  *
  * Moleküldynamiksimulation
  *
  * \subsection algorithms_subsec Implementierte Verfahren und deren Klassen
  *
- * - LJ_Potential das (skalierte) Lennard-Jones-Potential \f$U(r_{ij})
- * = -4\varepsilon \cdot \left( \frac{\sigma}{r_{ij}} \right)^6 \cdot
- * \left( \left( \frac{\sigma}{r_{ij}} \right)^6 -1 \right)\f$
  * - VelocityVerlet mit \f$O(N^2)\f$ Kraftberechnungen
+ * - Linked_Cell Methode
+ * - MPI
  *
  * \subsection classes_subsec Weitere modifizierte Klassen
  *
  * - World
+ * - World_LC
  * - Observer
  * - ObserverXYZ
+ * - ObserverXYZ_LC
+ * - SubDomain
  *
  * \subsection manual_sec Anleitung
  *
  * \code
- * make && ./blatt3
+ * make && ./blatt5
  * \endcode
  *
  */
