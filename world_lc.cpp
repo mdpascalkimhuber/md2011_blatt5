@@ -70,6 +70,10 @@ void World_LC::compute_cell_pos(unsigned index, int (&cell_pos)[DIM])
 // again to read additional parameters
 void World_LC::read_Parameter(const std::string &filename) 
 {
+  /*--------------------------------------------------------------------------------
+    read *.parameter-file 
+    --------------------------------------------------------------------------------*/
+
   // call original member function to read basic parameters
   World::read_Parameter(filename); 
   
@@ -115,6 +119,20 @@ void World_LC::read_Parameter(const std::string &filename)
 
   // close file
   parfile.close(); 
+
+  /*--------------------------------------------------------------------------------
+    instanciate all variables of the subdomain
+    --------------------------------------------------------------------------------*/
+
+  // calculate ip of subdomain
+  s.comp_ip(); 
+
+
+
+
+  /*--------------------------------------------------------------------------------
+    calculate all cell specific data
+    --------------------------------------------------------------------------------*/
 
   // calculating number of cells and length of cells
   for (unsigned dim = 0; dim < DIM; dim++) 
