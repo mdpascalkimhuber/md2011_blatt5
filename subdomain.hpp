@@ -23,6 +23,13 @@ public:
    * @brief calculate ip of subdomain with myrank
    */
   void comp_ip(); 
+
+  /**
+   * @brief calculate rank of neighbour subdomains on the basis of ip 
+   *
+   * @param other_ip[dim]
+   */
+  int comp_otherrank(int other_ip[DIM]); 
   
   // data about world
   /// world size 

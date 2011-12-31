@@ -28,3 +28,20 @@ void SubDomain::comp_ip()
       index = (index - ip[dim-1])/N_p[dim-1]; 
     }
 }; 
+
+
+// compute rank of a subdomain on the basis of the ip
+int SubDomain::comp_otherrank(int other_ip[DIM])
+{
+  int otherrank = 0; 
+  // calculate other_rank: similar to compute_global
+  for (unsigned dim = 0; dim < DIM; dim++)
+    {
+      otherrank *= N_p[dim]; 
+      otherrank += other_ip[dim];
+    }
+
+  // return value
+  return otherrank; 
+
+}; 
