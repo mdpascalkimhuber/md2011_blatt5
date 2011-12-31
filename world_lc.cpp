@@ -105,6 +105,12 @@ void World_LC::read_Parameter(const std::string &filename)
 	strstr >> thermostat_target_temperature;
       if (option == "random_seed")
 	strstr >> random_seed;
+      if (option == "procs")
+	{
+	  // for each dimension
+	  for (unsigned dim = 0; dim < DIM; dim++)
+	    strstr >> s.N_p[dim]; 
+	}
     }
 
   // close file
