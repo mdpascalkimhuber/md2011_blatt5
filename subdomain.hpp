@@ -8,6 +8,17 @@
  */
 class SubDomain {
 public: 
+  /** 
+   * @brief standard constructor
+   */
+  SubDomain(); 
+
+  /**
+   * @brief constructor for a subdomain with given myrank and given
+   * numprocs
+   */
+  SubDomain(int rank, int numprocessors);  
+  
   // data about world
   /// world size 
   real L[DIM]; 

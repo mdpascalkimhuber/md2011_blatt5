@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
   LJ_Potential Pot(2.5);
 
   // create World
-  World_LC W; 
+  World_LC W(myrank, numprocs); 
   
   // read Parameters
   W.read_Parameter(argv[1]);

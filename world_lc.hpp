@@ -15,7 +15,15 @@
 
 class World_LC : public World {
 public: 
+  /**
+   * @brief standard constructor
+   */
   World_LC(); 
+
+  /**
+   * @brief constructor for process myrank 
+   */
+  World_LC(int rank, int numprocessors); 
 
   /**
    * @brief read world parameters from given parameter file

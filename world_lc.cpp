@@ -6,12 +6,17 @@
 #include <cstdlib>
 #include <ctime>
 
-
+// standard constructor
 World_LC::World_LC() : World(), cell_r_cut(0), particles_N(0), global_cell_N(1), set_start_temperature(0), random_seed(0), thermostat_step_interval(0), thermostat_target_temperature(0)
 {
   // empty constructor
 }; 
 
+// constructor for process myrank
+World_LC::World_LC(int rank, int numprocessors) : World(), cell_r_cut(0), particles_N(0), global_cell_N(1), set_start_temperature(0), random_seed(0), thermostat_step_interval(0), thermostat_target_temperature(0), s(rank, numprocessors)
+{
+  // empty constructor
+}
 
 // calculate index of a cell with cell_coordinates
 unsigned World_LC::compute_global(const int (&cell_pos)[DIM])
