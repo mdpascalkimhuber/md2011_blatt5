@@ -15,3 +15,16 @@ SubDomain::SubDomain(int rank, int numprocessors) : myrank(rank), numprocs(numpr
     N_p[dim] = 0; 
 }; 
 
+
+// compute ip of subdomain with myrank and N_p
+void SubDomain::comp_ip()
+{
+  // initialize helper variable
+  int index = myrank; 
+  // calculate ip with myrank (similar to compute_cell_pos)
+  for (unsigned dim = DIM; dim > 0; dim--)
+    {
+      ip[dim-1] = index % N_p[dim-1]; 
+      index = (index - ip[dim-1])/N_p[dim-1]; 
+    }
+}; 

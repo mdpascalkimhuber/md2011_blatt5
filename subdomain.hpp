@@ -18,6 +18,11 @@ public:
    * numprocs
    */
   SubDomain(int rank, int numprocessors);  
+
+  /**
+   * @brief calculate ip of subdomain with myrank
+   */
+  void comp_ip(); 
   
   // data about world
   /// world size 
