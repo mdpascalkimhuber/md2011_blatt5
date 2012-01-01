@@ -27,10 +27,18 @@ public:
   /**
    * @brief calculate rank of neighbour subdomains on the basis of ip 
    *
-   * @param other_ip[dim]
+   * @param const int other_ip[DIM] ip of neighbouring subdomain
    */
-  int comp_otherrank(int other_ip[DIM]); 
-  
+  int comp_otherrank(const int other_ip[DIM]); 
+
+  /**
+   * @brief calculates the ranks of neighbouring subdomains
+   *
+   * @param const BorderType &borders[DIM][2] border_types of the world
+   */
+  void comp_neighbouring_ip(const BorderType borders[DIM][2]);
+
+
   // data about world
   /// world size 
   real L[DIM]; 
