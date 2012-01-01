@@ -161,15 +161,17 @@ void World_LC::read_Parameter(const std::string &filename)
       s.ic_start[dim] = int(cell_length[dim]/cell_r_cut); 
       // calculate ic_stop (no. of cells in subdomain) (the borders of
       // subdomain are supposed to coincident wiht those of the cells)  
-      s.ic_stop[dim] = int(cell_N[dim] / s.N_p[dim]) + s.ic_start[dim]; 
+      s.ic_stop[dim] = int(cell_N[dim]) / s.N_p[dim] + s.ic_start[dim]; 
       // calculate number of cells in subdomain with border_cells
       s.ic_number[dim] = s.ic_stop[dim] + s.ic_start[dim]; 
       // calculate global index of first cell in (inner) subdomain
       s.ic_lower_global[dim] = s.ip[dim]*(s.ic_stop[dim] - s.ic_start[dim]); 
-
+      // correct world_size 
       world_size[dim] = real(s.ic_number[dim])*s.cellh[dim]; 
+      // correct cell number
+      cell_N[dim] = s.ic_number[dim]; 
     }
-
+ 
 
   /*--------------------------------------------------------------------------------
     create cells for subdomain
@@ -196,7 +198,6 @@ void World_LC::read_Parameter(const std::string &filename)
       // add cell to cell_vector in world
       cells.push_back(new_cell); 
     }
-
 };
 
 
@@ -235,8 +236,9 @@ void World_LC::read_Particles(const std::string &filename)
 	}
 
       // if particle is not in right domain, delete it
-      if (in_subdomain = false)
+      if (in_subdomain == false)
 	{
+	  std::cout << "DELETED" << std::endl; 
 	  itparticle = particles.erase(itparticle); 
 	}
       // if it is in right domain, put it in the right (inner) cell
@@ -246,10 +248,12 @@ void World_LC::read_Particles(const std::string &filename)
 	  for (unsigned dim = 0; dim < DIM; dim++) 
 	    { // corrected position: attention to border cells
 	      sub_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
+	      std::cout << "sub_pos" << dim << " " << sub_pos[dim] << std::endl; 
 	    }
 	  
 	  // calculate the index of the right cell 
 	  index = compute_cell_index(sub_pos); 
+	  std::cout << "cell_index " << index << std::endl; 
 
 	  // add particle to particles-vector in the right cell
 	  cells[index].particles.push_back(particles.front()); 
