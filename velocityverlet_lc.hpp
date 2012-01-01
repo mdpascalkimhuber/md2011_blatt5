@@ -35,7 +35,12 @@ public:
    */
   virtual real distance(Particle &p, Particle &q); 
 
-    /**
+  /**
+   * @brief handle communication between subdomains before
+   * force-calculation. 
+   */
+  virtual void communication_1(); 
+  /**
    * @brief calculates the new velocity of the particles
    */
   virtual void comp_F(); 

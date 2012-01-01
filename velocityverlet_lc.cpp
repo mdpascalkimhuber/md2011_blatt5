@@ -1,6 +1,7 @@
 #include "velocityverlet_lc.hpp"
 #include "observerxyz_lc.hpp"
 #include <math.h>
+#include <mpi.h>
 
 // new constructor with argument World_LC
 VelocityVerlet_LC::VelocityVerlet_LC(World_LC& _W, Potential& _Pot, ObserverXYZ_LC &_O) : TimeDiscretization(_W, _Pot, _O), W_LC(_W), O_LC(_O)
@@ -550,6 +551,62 @@ void VelocityVerlet_LC::comp_F_other_cell(unsigned const c_idx, int (&other_cell
 	      // increment first iterator
 	      it_p++; 
 	    }
+	}
+    }
+}
+
+
+// communication between subdomains before force-calculation
+void VelocityVerlet_LC::communication_1()
+{
+  // loop over all (three) dimensions 
+  for (unsigned dim = DIM-1; dim >= 0; dim++)
+    {
+      // loop over all subdomains
+      for (unsigned rank = 0; rank < W_LC.s.numprocs; rank++)
+	{
+	  // loop over cells concerned (for sending and receiving) 
+	  // sending
+	  if (dim == 2)
+	    {
+	      for (unsigned x1 = W_LC.s.ic_start[1]; x1 < W_LC.s.ic_stop[1]; x1++)
+		{
+		  for (unsigned x0 = W_LC.s.ic_start[0];  x0 < W_LC.s.ic_stop[0]; x0++)
+		    {
+		      /*--------------------------------------------------------------------------------
+			Sende die richtigen Partikel zu den richtigen
+			Zellen (achte auf BorderType etc) 
+			--------------------------------------------------------------------------------*/
+		    }
+		}
+	    }
+	  if (dim == 1)
+	    {
+	      for (unsigned x2 = 0; x2 < W_LC.s.ic_number[dim]; x2++)
+		{
+		  for (unsigned x0 = W_LC.s.ic_start[dim]; x0 < W_LC.s.ic_stop[0]; x0++)
+		    {
+		      /*--------------------------------------------------------------------------------
+			Sende die richtigen Partikel zu den richtigen
+			Zellen (achte auf BorderType etc) 
+			--------------------------------------------------------------------------------*/
+		    }
+		}
+	    }
+	  if (dim == 0)
+	    {
+	      for (unsigned x2 = 0; x2 < W_LC.s.ic_number[dim]; x2++)
+		{
+		  for (unsigned x1 = 0; x1 < W_LC.s.ic_number[dim]; x1++)
+		    {
+		      /*--------------------------------------------------------------------------------
+			Sende die richtigen Partikel zu den richtigen
+			Zellen (achte auf BorderType etc) 
+			--------------------------------------------------------------------------------*/
+		    }
+		}
+	    }
+	  // receiving
 	}
     }
 }
