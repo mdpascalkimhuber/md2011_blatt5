@@ -173,12 +173,18 @@ void World_LC::read_Parameter(const std::string &filename)
   /*--------------------------------------------------------------------------------
     create cells for subdomain
     --------------------------------------------------------------------------------*/
-
+  
+  // helper_variable
+  int total_cell_number; 
   // just a helper cell
-  Cell new_cell; 
+  Cell new_cell = 1; 
+
+  // initialize total_cell_number
+  for (unsigned dim = 0; dim < DIM; dim++)
+    total_cell_number *= s.ic_numbe[dim]; 
 
   // Adding cells to world and writing some information in them
-  for (unsigned c_idx = 0; c_idx < global_cell_N; c_idx++)
+  for (unsigned c_idx = 0; c_idx < total_cell_number; c_idx++)
     {
       // give an id to cell
       new_cell.id = c_idx + 1; 
