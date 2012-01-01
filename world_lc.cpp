@@ -144,7 +144,7 @@ void World_LC::read_Parameter(const std::string &filename)
   /*--------------------------------------------------------------------------------
     instanciate all variables of the subdomain
     --------------------------------------------------------------------------------*/
-
+  
   // calculate ip of subdomain
   s.comp_ip(); 
   // set length of whole world, cell_length, number of cells in whole
@@ -167,7 +167,6 @@ void World_LC::read_Parameter(const std::string &filename)
       // calculate global index of first cell in (inner) subdomain
       s.ic_lower_global[dim] = s.ip[dim]*(s.ic_stop[dim] - s.ic_start[dim]); 
     }
-  
 
 
   /*--------------------------------------------------------------------------------
