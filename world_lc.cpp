@@ -175,16 +175,16 @@ void World_LC::read_Parameter(const std::string &filename)
     --------------------------------------------------------------------------------*/
   
   // helper_variable
-  int total_cell_number; 
+  int total_cell_number = 1; 
   // just a helper cell
-  Cell new_cell = 1; 
+  Cell new_cell; 
 
   // initialize total_cell_number
   for (unsigned dim = 0; dim < DIM; dim++)
-    total_cell_number *= s.ic_numbe[dim]; 
+    total_cell_number *= s.ic_number[dim]; 
 
   // Adding cells to world and writing some information in them
-  for (unsigned c_idx = 0; c_idx < total_cell_number; c_idx++)
+  for (int c_idx = 0; c_idx < total_cell_number; c_idx++)
     {
       // give an id to cell
       new_cell.id = c_idx + 1; 
@@ -207,7 +207,7 @@ void World_LC::read_Particles(const std::string &filename)
   World::read_Particles(filename); 
 
   // instanciate total number of particles in particles_N
-  particles_N = 0,
+  particles_N = 0; 
 
   // helper variable
   unsigned index; 
@@ -244,7 +244,7 @@ void World_LC::read_Particles(const std::string &filename)
       	  // instanciate sub_pos (corrected positions for subdomain)
 	  for (unsigned dim = 0; dim < DIM; dim++) 
 	    { // corrected position: attention to border cells
-	      sup_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
+	      sub_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
 	    }
 	  
 	  // calculate the index of the right cell 
