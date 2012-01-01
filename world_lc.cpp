@@ -166,6 +166,8 @@ void World_LC::read_Parameter(const std::string &filename)
       s.ic_number[dim] = s.ic_stop[dim] + s.ic_start[dim]; 
       // calculate global index of first cell in (inner) subdomain
       s.ic_lower_global[dim] = s.ip[dim]*(s.ic_stop[dim] - s.ic_start[dim]); 
+
+      world_size[dim] = real(s.ic_number[dim])*s.cellh[dim]; 
     }
 
 
