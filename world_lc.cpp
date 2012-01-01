@@ -163,7 +163,7 @@ void World_LC::read_Parameter(const std::string &filename)
       // subdomain are supposed to coincident wiht those of the cells)  
       s.ic_stop[dim] = int(cell_N[dim] / s.N_p[dim]) + s.ic_start[dim]; 
       // calculate number of cells in subdomain with border_cells
-      s.ic_number[dim] = s.ic_stop[dim] + (2*s.ic_start[dim]); 
+      s.ic_number[dim] = s.ic_stop[dim] + s.ic_start[dim]; 
       // calculate global index of first cell in (inner) subdomain
       s.ic_lower_global[dim] = s.ip[dim]*(s.ic_stop[dim] - s.ic_start[dim]); 
     }
@@ -206,27 +206,60 @@ void World_LC::read_Particles(const std::string &filename)
   // call original read_Particles of the basis class World
   World::read_Particles(filename); 
 
-  // writing total number of particles in particles_N
-  particles_N = particles.size(); 
+  // instanciate total number of particles in particles_N
+  particles_N = 0,
 
   // helper variable
   unsigned index; 
+  // corrected position of particle for subdomain
+  real sub_pos[DIM]; 
+  // bool to check if particle is in right subdomain
+  bool in_subdomain; 
   // helper iterator for particle-vector
   std::list<Particle>::iterator itparticle = particles.begin(); 
   
   // delete particles of particles-vector and put them in right cells
   while (itparticle != particles.end())
     {
-      // calculate the index of the right cell 
-      index = compute_cell_index(itparticle->x); 
+      // check if itparticle is in right domain
+      // instanciate bool-variable
+      in_subdomain = true; 
+      for (unsigned dim = 0; dim < DIM; dim++)
+	{ // lower border
+	  if (itparticle->x[dim] < (real(s.ic_lower_global[dim])*s.cellh[dim]))
+	    in_subdomain = false; 
+	  // upper border
+	  else if (itparticle->x[dim] >= (real(s.ic_lower_global[dim]+(s.ic_stop[dim]-s.ic_start[dim]))*s.cellh[dim]))
+	    in_subdomain = false; 
+	}
 
-      // add particle to particles-vector in the right cell
-      cells[index].particles.push_back(particles.front()); 
+      // if particle is not in right domain, delete it
+      if (in_subdomain = false)
+	{
+	  itparticle = particles.erase(itparticle); 
+	}
+      // if it is in right domain, put it in the right (inner) cell
+      else
+	{
+      	  // instanciate sub_pos (corrected positions for subdomain)
+	  for (unsigned dim = 0; dim < DIM; dim++) 
+	    { // corrected position: attention to border cells
+	      sup_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
+	    }
+	  
+	  // calculate the index of the right cell 
+	  index = compute_cell_index(sub_pos); 
 
-      // delete particle in world_particles-vector
-      itparticle = particles.erase(itparticle); 
+	  // add particle to particles-vector in the right cell
+	  cells[index].particles.push_back(particles.front()); 
+
+	  // update number of particles in subdomain
+	  particles_N++;  
+
+	  // delete particle in world_particles-vector
+	  itparticle = particles.erase(itparticle); 
+	}
     }
-  
   // Calculating new velocities for each particle if start_temperature
   /*--------------------------------------------------------------
     ONLY FOR 2D: Maxwell-Boltzmann-distribution
