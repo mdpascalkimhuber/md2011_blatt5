@@ -161,11 +161,13 @@ void World_LC::read_Parameter(const std::string &filename)
       s.ic_start[dim] = int(cell_length[dim]/cell_r_cut); 
       // calculate ic_stop (no. of cells in subdomain) (the borders of
       // subdomain are supposed to coincident wiht those of the cells)  
-      s.ic_stop[dim] = int(cell_N[dim] / s.N_p[dim]); 
+      s.ic_stop[dim] = int(cell_N[dim] / s.N_p[dim]) + s.ic_start[dim]; 
       // calculate number of cells in subdomain with border_cells
       s.ic_number[dim] = s.ic_stop[dim] + (2*s.ic_start[dim]); 
+      // calculate global index of first cell in (inner) subdomain
+      s.ic_lower_global[dim] = s.ip[dim]*(s.ic_stop[dim] - s.ic_start[dim]); 
     }
-
+  
 
 
   /*--------------------------------------------------------------------------------
