@@ -60,7 +60,7 @@ public:
   int ip_upper[DIM]; 
   /// width of margin (normaly 1 in every dimension)
   int ic_start[DIM]; 
-  /// upper corner of margin
+  /// upper corner of margin = number of cells in every dimension 
   int ic_stop[DIM]; 
   /// number of cells in subdomain (with margin)
   int ic_number[DIM]; 

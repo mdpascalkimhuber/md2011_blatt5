@@ -120,15 +120,6 @@ void World_LC::read_Parameter(const std::string &filename)
   // close file
   parfile.close(); 
 
-  /*--------------------------------------------------------------------------------
-    instanciate all variables of the subdomain
-    --------------------------------------------------------------------------------*/
-
-  // calculate ip of subdomain
-  s.comp_ip(); 
-
-
-
 
   /*--------------------------------------------------------------------------------
     calculate all cell specific data
@@ -138,7 +129,7 @@ void World_LC::read_Parameter(const std::string &filename)
   for (unsigned dim = 0; dim < DIM; dim++) 
     {
       // calculate number of cells: the typecast allows a cell
-      // length inferior to cell_r_cut
+      // length superior to cell_r_cut
       cell_N[dim] = std::max(1, int(world_size[dim]/cell_r_cut)); 
       
       // calculate length of cell (implicit typecast of cell_N)
@@ -148,6 +139,39 @@ void World_LC::read_Parameter(const std::string &filename)
       global_cell_N *= cell_N[dim]; 
     }
   
+
+
+  /*--------------------------------------------------------------------------------
+    instanciate all variables of the subdomain
+    --------------------------------------------------------------------------------*/
+
+  // calculate ip of subdomain
+  s.comp_ip(); 
+  // set length of whole world, cell_length, number of cells in whole
+  // world and other variables
+  for (unsigned dim = 0; dim < DIM; dim++)
+    {
+      // Length of whole world
+      s.L[dim] = world_size[dim]; 
+      // total of cells in whole world
+      s.N_c[dim] = cell_N[dim]; 
+      // length of cells
+      s.cellh[dim] = cell_length[dim]; 
+      // set borderwidth of subdomain to 1 as default
+      s.ic_start[dim] = int(cell_length[dim]/cell_r_cut); 
+      // calculate ic_stop (no. of cells in subdomain) (the borders of
+      // subdomain are supposed to coincident wiht those of the cells)  
+      s.ic_stop[dim] = int(cell_N[dim] / s.N_p[dim]); 
+      // calculate number of cells in subdomain with border_cells
+      s.ic_number[dim] = s.ic_stop[dim] + (2*s.ic_start[dim]); 
+    }
+
+
+
+  /*--------------------------------------------------------------------------------
+    create cells for subdomain
+    --------------------------------------------------------------------------------*/
+
   // just a helper cell
   Cell new_cell; 
 
@@ -163,14 +187,15 @@ void World_LC::read_Parameter(const std::string &filename)
       // add cell to cell_vector in world
       cells.push_back(new_cell); 
     }
+
 };
 
 
-// derived read_Parameters: call the original member function and
+// derived read_Particles: call the original member function and
 // distribute all particles over the cells 
 void World_LC::read_Particles(const std::string &filename)
 {
-  // call original read_Parameter of the basis class World
+  // call original read_Particles of the basis class World
   World::read_Particles(filename); 
 
   // writing total number of particles in particles_N
