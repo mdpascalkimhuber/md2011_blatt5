@@ -35,9 +35,6 @@ int main(int argc, char *argv[]) {
     Calculations for the SubDomain
     --------------------------------------------------------------------------------*/
 
-  // terminate MPI
-  MPI::Finalize(); 
-  
   // instantiate Potential
   LJ_Potential Pot(2.5);
 
@@ -68,12 +65,9 @@ int main(int argc, char *argv[]) {
   // run the simulation
   Verlet.simulate();
 
-  // print Cell configuration 
-  /*  for ( unsigned index = 0; index < W.cells.size(); index++)
-    {
-      cout << W.cells[index]; 
-      }*/
-
+  // terminate MPI
+  MPI::Finalize(); 
+  
   return EXIT_SUCCESS;
 }
 

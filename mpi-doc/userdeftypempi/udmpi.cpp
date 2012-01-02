@@ -38,7 +38,7 @@ int main ( int argc, char *argv[] )
   MPI::Datatype type[4] = {MPI::INT, MPI::DOUBLE, MPI::DOUBLE, MPI::DOUBLE};
   int blocklen[4] = {1,1,DIM,DIM};
   MPI::Aint disp[4]; // displacements
-  MPI::Aint base;
+  mpi::Aint base;
 
   /* compute displacements */
   disp[0] = MPI::Get_address(&p);
