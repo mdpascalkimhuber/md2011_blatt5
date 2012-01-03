@@ -617,26 +617,103 @@ void VelocityVerlet_LC::comm1()
     }
   
   /*---------------------------------------- step2 (x2) ------------------------------*/
-  for (int x2 = 0; x2 < W_LC.s.ic_number[2]; x2++)
+  for (loop_idx[2] = 0; loop_idx[2] < W_LC.s.ic_number[2]; loop_idx[2]++)
     { // all cells in x2 - direction
-      for (int x0 = W_LC.s.ic_start[0]; x0 < W_LC.s.ic_stop[0]; x0++)
+      for (loop_idx[0] = W_LC.s.ic_start[0]; loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
 	{
-	  // SENDEN UND EMPFANGEN
+	  /* ---------------------------------------- SENDING --------------------*/
+	  // lower subdomain
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[1] >= 0)
+	    {
+	      // initialize current cell
+	      for (int dim = 0; dim < DIM; dim++) {current_cell[dim] = loop_idx[dim];}
+	      current_cell[1] = W_LC.s.ic_start[1]; 
+	      
+	      // send particle information
+	      comm1_send(current_cell, W_LC.s.ip_lower[1]); 
+	    }
+	  // upper subdomain
+	  if (W_LC.s.ip_upper[1] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[1] = W_LC.s.ic_stop[1] - 1; 
+
+	      // send particle information
+	      comm1_send(current_cell, W_LC.s.ip_upper[1]); 
+	    }
+	  
+	  /*---------------------------------------- RECEIVING --------------------*/
+	  // lower subdomain
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[1] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[1] = 0; 
+
+	      // receive particle information
+	      comm1_recv(current_cell, W_LC.s.ip_lower[1]); 
+	    }
+	  if (W_LC.s.ip_upper[1] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[1] = W_LC.s.ic_stop[1]; 
+
+	      //receive particle information 
+	      comm1_recv(current_cell, W_LC.s.ip_upper[1]); 
+	    }
 	}
     }
 
   /*---------------------------------------- step 3 (x1) ------------------------------*/
-  for (int x2 = 0; x2 < W_LC.s.ic_number[2]; x2++)
+  for (loop_idx[2] = 0; loop_idx[2] < W_LC.s.ic_number[2]; loop_idx[2]++)
     { // all cells in both directions
-      for (int x1 = 0; x1 < W_LC.s.ic_number[1]; x1++)
+      for (loop_idx[1] = 0; loop_idx[1] < W_LC.s.ic_number[1]; loop_idx[1]++)
 	{
-	  // SENDEN UND EMPFANGEN
+	  /* ---------------------------------------- SENDING --------------------*/
+	  // lower subdomain
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[0] >= 0)
+	    {
+	      // initialize current cell
+	      for (int dim = 0; dim < DIM; dim++) {current_cell[dim] = loop_idx[dim];}
+	      current_cell[0] = W_LC.s.ic_start[0]; 
+	      
+	      // send particle information
+	      comm1_send(current_cell, W_LC.s.ip_lower[0]); 
+	    }
+	  // upper subdomain
+	  if (W_LC.s.ip_upper[0] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[0] = W_LC.s.ic_stop[0] - 1; 
+
+	      // send particle information
+	      comm1_send(current_cell, W_LC.s.ip_upper[0]); 
+	    }
+	  
+	  /*---------------------------------------- RECEIVING --------------------*/
+	  // lower subdomain
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[0] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[0] = 0; 
+
+	      // receive particle information
+	      comm1_recv(current_cell, W_LC.s.ip_lower[0]); 
+	    }
+	  if (W_LC.s.ip_upper[0] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[0] = W_LC.s.ic_stop[0]; 
+
+	      //receive particle information 
+	      comm1_recv(current_cell, W_LC.s.ip_upper[0]); 
+	    }
 	}
     }
 }
-
-
-
 
 
 // send particle information of one cell before force calculation

@@ -1,0 +1,10 @@
+name b2ex1
+delta_t 0.01
+t_end 1.00
+length 10.0 10.0 10.0
+upper_border leaving leaving leaving
+lower_border leaving leaving leaving
+sigma 1
+epsilon 1
+cell_r_cut 5.0
+procs 2 1 1
