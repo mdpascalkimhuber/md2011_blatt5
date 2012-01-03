@@ -1,5 +1,6 @@
 #include "velocityverlet_lc.hpp"
 #include "observerxyz_lc.hpp"
+#include "particle.hpp"
 #include <math.h>
 #include <mpi.h>
 
@@ -557,103 +558,80 @@ void VelocityVerlet_LC::comp_F_other_cell(unsigned const c_idx, int (&other_cell
 
 
 // communication between subdomains before force-calculation
-void VelocityVerlet_LC::communication_1()
+void VelocityVerlet_LC::comm_1()
 {
-  // loop over all (three) dimensions 
-  for (int dim = DIM-1; dim >= 0; dim++)
-    {
-      // loop over cells concerned (for sending and receiving) 
-      // sending
-      if (dim == 2)
-	{
-	  for (int x1 = W_LC.s.ic_start[1]; x1 < W_LC.s.ic_stop[1]; x1++)
-	    {
-	      for (int x0 = W_LC.s.ic_start[0];  x0 < W_LC.s.ic_stop[0]; x0++)
-		{
-		  /*--------------------------------------------------------------------------------
-		    Sende die richtigen Partikel zu den richtigen
-		    Zellen (achte auf BorderType etc) 
-		    --------------------------------------------------------------------------------*/
-		  
-		  /*-------------------- untere Zellen ---------------------------------------------*/
-		  // check if neighbouring process exists for lower border
-		  if (W_LC.s.ip_lower[dim] >= 0)
-		    {
-		      
-		    }
+  // helper variable
+  int loop_idx[DIM]; 
+  int current_cell[DIM]; 
 
-		}
-	    }
-	}
-      if (dim == 1)
+  /*---------------------------------------- step1 (x3) ------------------------------*/
+  for (int loop_idx[1] = W_LC.s.ic_start[1]; loop_idx[1] < W_LC.s.ic_stop[1]; loop_idx[1]++) 
+    { // only the inner cells
+      for (int loop_idx[0] = W_LC.s.ic_start[0];  loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
 	{
-	  for (int x2 = 0; x2 < W_LC.s.ic_number[dim]; x2++)
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[2] >= 0)
 	    {
-	      for (int x0 = W_LC.s.ic_start[dim]; x0 < W_LC.s.ic_stop[0]; x0++)
-		{
-		  /*--------------------------------------------------------------------------------
-		    Sende die richtigen Partikel zu den richtigen
-		    Zellen (achte auf BorderType etc) 
-		    --------------------------------------------------------------------------------*/
-		}
+	      // initialize current cell
+	      for (int dim = 0; dim < DIM; dim++)
+		current_cell[dim] = loop_idx[dim]; 
+	      current_cell[3] = W_LC.s.ic_start[3]; 
+	      
+	      // send particle information
+	      comm1_send_lower(current_cell, 2); 
 	    }
 	}
-      if (dim == 0)
+    }
+  
+  /*---------------------------------------- step2 (x2) ------------------------------*/
+  for (int x2 = 0; x2 < W_LC.s.ic_number[2]; x2++)
+    { // all cells in x2 - direction
+      for (int x0 = W_LC.s.ic_start[0]; x0 < W_LC.s.ic_stop[0]; x0++)
 	{
-	  for (int x2 = 0; x2 < W_LC.s.ic_number[dim]; x2++)
-	    {
-	      for (int x1 = 0; x1 < W_LC.s.ic_number[dim]; x1++)
-		{
-		  /*--------------------------------------------------------------------------------
-		    Sende die richtigen Partikel zu den richtigen
-		    Zellen (achte auf BorderType etc) 
-		    --------------------------------------------------------------------------------*/
-		}
-	    }
+	  // SENDEN UND EMPFANGEN
 	}
-      // receiving
+    }
+
+  /*---------------------------------------- step 3 (x1) ------------------------------*/
+  for (int x2 = 0; x2 < W_LC.s.ic_number[2]; x2++)
+    { // all cells in both directions
+      for (int x1 = 0; x1 < W_LC.s.ic_number[1]; x1++)
+	{
+	  // SENDEN UND EMPFANGEN
+	}
     }
 }
 
 
+
+
+
 // communication before force calculation between cells of different
 // subdomains 
-void VelocityVerlet_LC::communication_1_cell_send_lower(const int (&cell_pos)[DIM], int dir)
+void VelocityVerlet_LC::comm1_send_lower(const int (&cell_pos)[DIM], int dir)
 {
   // initialize helper variables
-  int dest_cell_lower[DIM]; 
-  
+  int dest_cell[DIM]; 
+  int size; 
+  unsigned global_idx = W_LC.compute_global(cell_pos); 
+  unsigned other_global_idx; 
+
   // calculate destination cells for communication 
   for (int dim = 0; dim < DIM; dim++)
     {
-      dest_cell_lower[dim] = cell_pos[dim]; 
+      dest_cell[dim] = cell_pos[dim]; 
     }
-  dest_cell_lower[dir] = W_LC.s.ic_number[dir] - 1; 
+  dest_cell[dir] = W_LC.s.ic_number[dir] - 1; 
+  other_global_idx = W_LC.compute_global(dest_cell); 
 
-  /*--------------------------------------------------------------------------------
-    create a new MPI datatype
-    --------------------------------------------------------------------------------*/
+  // create MPI_Particle
+  MPI::Datatype MPI_Particle; 
+  build_particle(MPI_Particle); 
 
-  // helper Variable
-  Particle p; 
-
-  // build new mpi datatype (reduced particle)
-  MPI::Datatype MPI_Particle_reduced; 
-  MPI::Datatype type[3] = {MPI::INT, MPI::DOUBLE, MPI::DOUBLE};
-  int blocklen[3] = {1,1,DIM};
-  MPI::Aint disp[3]; // displacements
-  MPI::Aint base;
-
-  /* compute displacements */
-  disp[0] = MPI::Get_address(&p);
-  disp[1] = MPI::Get_address(&p.m);
-  disp[2] = MPI::Get_address(&p.x);
-
-  base = disp[0];
-  for (unsigned i=0; i<3; i++) disp[i] -= base;
-
-  MPI_Particle_reduced = MPI::Datatype::Create_struct(3, blocklen, disp, type);
-  MPI_Particle.Commit();
-
+  // prepare send
+  size = W_LC.cells[global_idx].particles.size();
   
+  // send to other cell
+  MPI::COMM_WORLD.Isend(&size, 1, MPI::INT, W_LC.s.ip_lower[dir], 1);
+  MPI::COMM_WORLD.Isend(&W_LC.cells[global_idx].particles.front(), size, MPI_Particle, W_LC.s.ip_lower[dir], 2);
 }

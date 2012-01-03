@@ -134,4 +134,3 @@ void SubDomain::comp_neighbouring_ip(const BorderType borders[DIM][2])
       other_ip[dim] = ip[dim]; 
     }
 }; 
-

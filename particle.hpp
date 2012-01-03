@@ -3,6 +3,7 @@
 
 #include "defines.hpp"
 #include <iostream>
+#include <mpi.h>
 
 /**
  * @brief Particle data
@@ -25,8 +26,15 @@ public:
   real F_old[DIM];
 };
 
+/* 
+ * @brief build MPI_Datatype MPI_Particle
+ */
+void build_particle(MPI::Datatype& MPI_Particle); 
 
-std::ostream& operator << (std::ostream &Stream, const Particle &P);
+/*
+ * @brief output operator for particles
+ */
+  std::ostream& operator << (std::ostream &Stream, const Particle &P);
 
 #endif // _PARTICLE_HPP
 // vim:set et sts=4 ts=4 sw=4 ai ci cin:
