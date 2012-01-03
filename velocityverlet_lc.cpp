@@ -558,27 +558,60 @@ void VelocityVerlet_LC::comp_F_other_cell(unsigned const c_idx, int (&other_cell
 
 
 // communication between subdomains before force-calculation
-void VelocityVerlet_LC::comm_1()
+/*--------------------------------------------------------------------------------
+Function only works for borders with width = 1
+--------------------------------------------------------------------------------*/
+void VelocityVerlet_LC::comm1()
 {
   // helper variable
   int loop_idx[DIM]; 
   int current_cell[DIM]; 
 
   /*---------------------------------------- step1 (x3) ------------------------------*/
-  for (int loop_idx[1] = W_LC.s.ic_start[1]; loop_idx[1] < W_LC.s.ic_stop[1]; loop_idx[1]++) 
+  for (loop_idx[1] = W_LC.s.ic_start[1]; loop_idx[1] < W_LC.s.ic_stop[1]; loop_idx[1]++) 
     { // only the inner cells
-      for (int loop_idx[0] = W_LC.s.ic_start[0];  loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
-	{
+      for (loop_idx[0] = W_LC.s.ic_start[0];  loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
+	{ 
+	  /* ---------------------------------------- SENDING --------------------*/
+	  // lower subdomain
 	  // check if neighbour subdomain exists
 	  if (W_LC.s.ip_lower[2] >= 0)
 	    {
 	      // initialize current cell
-	      for (int dim = 0; dim < DIM; dim++)
-		current_cell[dim] = loop_idx[dim]; 
-	      current_cell[3] = W_LC.s.ic_start[3]; 
+	      for (int dim = 0; dim < DIM; dim++) {current_cell[dim] = loop_idx[dim];}
+	      current_cell[2] = W_LC.s.ic_start[2]; 
 	      
 	      // send particle information
-	      comm1_send_lower(current_cell, 2); 
+	      comm1_send(current_cell, W_LC.s.ip_lower[2]); 
+	    }
+	  // upper subdomain
+	  if (W_LC.s.ip_upper[2] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[2] = W_LC.s.ic_stop[2] - 1; 
+
+	      // send particle information
+	      comm1_send(current_cell, W_LC.s.ip_upper[2]); 
+	    }
+	  
+	  /*---------------------------------------- RECEIVING --------------------*/
+	  // lower subdomain
+	  // check if neighbour subdomain exists
+	  if (W_LC.s.ip_lower[2] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[2] = 0; 
+
+	      // receive particle information
+	      comm1_recv(current_cell, W_LC.s.ip_lower[2]); 
+	    }
+	  if (W_LC.s.ip_upper[2] >= 0)
+	    {
+	      // initialize current cell
+	      current_cell[2] = W_LC.s.ic_stop[2]; 
+
+	      //receive particle information 
+	      comm1_recv(current_cell, W_LC.s.ip_upper[2]); 
 	    }
 	}
     }
@@ -606,23 +639,14 @@ void VelocityVerlet_LC::comm_1()
 
 
 
-// communication before force calculation between cells of different
-// subdomains 
-void VelocityVerlet_LC::comm1_send_lower(const int (&cell_pos)[DIM], int dir)
+// send particle information of one cell before force calculation
+void VelocityVerlet_LC::comm1_send(const int (&cell_pos)[DIM], int dest_sub)
 {
   // initialize helper variables
-  int dest_cell[DIM]; 
-  int size; 
+  int size; // number of particles in cell
   unsigned global_idx = W_LC.compute_global(cell_pos); 
-  unsigned other_global_idx; 
-
-  // calculate destination cells for communication 
-  for (int dim = 0; dim < DIM; dim++)
-    {
-      dest_cell[dim] = cell_pos[dim]; 
-    }
-  dest_cell[dir] = W_LC.s.ic_number[dir] - 1; 
-  other_global_idx = W_LC.compute_global(dest_cell); 
+  std::vector<Particle> adapter; // adapter vector for sending 
+  std::list<Particle>::iterator it_p = W_LC.cells[global_idx].particles.begin(); 
 
   // create MPI_Particle
   MPI::Datatype MPI_Particle; 
@@ -630,8 +654,46 @@ void VelocityVerlet_LC::comm1_send_lower(const int (&cell_pos)[DIM], int dir)
 
   // prepare send
   size = W_LC.cells[global_idx].particles.size();
-  
+  // put particles in adaber_vector for sending
+  while (it_p != W_LC.cells[global_idx].particles.end())
+    {
+      adapter.push_back(*it_p); 
+      it_p++; 
+    }
+    
   // send to other cell
-  MPI::COMM_WORLD.Isend(&size, 1, MPI::INT, W_LC.s.ip_lower[dir], 1);
-  MPI::COMM_WORLD.Isend(&W_LC.cells[global_idx].particles.front(), size, MPI_Particle, W_LC.s.ip_lower[dir], 2);
+  MPI::COMM_WORLD.Isend(&size, 1, MPI::INT, dest_sub, 1);
+  MPI::COMM_WORLD.Isend(&adapter.front(), size, MPI_Particle, dest_sub, 2);; 
+}
+
+// receiving particle information of one cell before force calculation 
+void VelocityVerlet_LC::comm1_recv(const int (&cell_pos)[DIM], int orig_sub)
+{
+  // initialize helper variables
+  int size; 
+  unsigned global_idx = W_LC.compute_global(cell_pos); 
+  std::vector<Particle> adapter; // adapter vector for receiving
+  std::vector<Particle>::iterator it_p; 
+
+  // create MPI_Particle
+  MPI::Datatype MPI_Particle; 
+  build_particle(MPI_Particle); 
+
+  // receive vector size
+  MPI::COMM_WORLD.Recv(&size, 1, MPI::INT, orig_sub, 1); 
+
+  // resize vector
+  adapter.resize(size); 
+  
+  // receive vector 
+  MPI::COMM_WORLD.Recv(&adapter.front(), size, MPI_Particle, orig_sub, 2); 
+
+  // initialize iterator
+  it_p = adapter.begin(); 
+  // put particles in particles_list of cell
+  while (it_p != adapter.end())
+    {
+      W_LC.cells[global_idx].particles.push_back(*it_p); 
+      it_p++; 
+    }
 }

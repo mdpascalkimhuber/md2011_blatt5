@@ -39,13 +39,19 @@ public:
    * @brief handle communication between subdomains before
    * force-calculation. 
    */
-  virtual void comm_1(); 
+  virtual void comm1(); 
 
   /**
-   * @brief handle communication (sending) between two cells of different
-   * subdomains before force-calculation. 
+   * @brief send particle information of a cell to a destination
+   * subdomain  
    */
-  virtual void comm1_send_lower(const int (&cell_pos)[DIM], int dir); 
+  virtual void comm1_send(const int (&cell_pos)[DIM], int dest_sub); 
+
+  /**
+   * @brief receive particle information of a cell from an origin
+   * subdomain
+   */
+  virtual void comm1_recv(const int (&cell_pos)[DIM], int orig_sub); 
 
   /**
    * @brief calculates the new velocity of the particles
