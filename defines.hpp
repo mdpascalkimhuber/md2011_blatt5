@@ -6,7 +6,7 @@
  *
  * \subsection algorithms_subsec Implementierte Verfahren und deren Klassen
  *
- * - VelocityVerlet mit \f$O(N^2)\f$ Kraftberechnungen
+ * - VelocityVerlet_LC mit \f$O(N^2)\f$ Kraftberechnungen
  * - Linked_Cell Methode
  * - MPI
  *
