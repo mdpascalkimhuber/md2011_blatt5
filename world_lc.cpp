@@ -113,7 +113,9 @@ void World_LC::read_Parameter(const std::string &filename)
 	{
 	  // for each dimension
 	  for (unsigned dim = 0; dim < DIM; dim++)
-	    strstr >> s.N_p[dim]; 
+	    {
+	      strstr >> s.N_p[dim]; 
+	    }
 	}
     }
 
@@ -147,6 +149,8 @@ void World_LC::read_Parameter(const std::string &filename)
   
   // calculate ip of subdomain
   s.comp_ip(); 
+  // calculate other ips
+  s.comp_neighbouring_ip(borders); 
   // set length of whole world, cell_length, number of cells in whole
   // world and other variables
   for (unsigned dim = 0; dim < DIM; dim++)
@@ -238,7 +242,6 @@ void World_LC::read_Particles(const std::string &filename)
       // if particle is not in right domain, delete it
       if (in_subdomain == false)
 	{
-	  std::cout << "DELETED" << std::endl; 
 	  itparticle = particles.erase(itparticle); 
 	}
       // if it is in right domain, put it in the right (inner) cell
@@ -248,12 +251,10 @@ void World_LC::read_Particles(const std::string &filename)
 	  for (unsigned dim = 0; dim < DIM; dim++) 
 	    { // corrected position: attention to border cells
 	      sub_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
-	      std::cout << "sub_pos" << dim << " " << sub_pos[dim] << std::endl; 
 	    }
 	  
 	  // calculate the index of the right cell 
 	  index = compute_cell_index(sub_pos); 
-	  std::cout << "cell_index " << index << std::endl; 
 
 	  // add particle to particles-vector in the right cell
 	  cells[index].particles.push_back(particles.front()); 
