@@ -95,9 +95,10 @@ void SubDomain::comp_neighbouring_ip(const BorderType borders[DIM][2])
 	ip_lower[dim] = -1; 
       else
 	ip_lower[dim] = comp_otherrank(other_ip); 
-
-      // instanciate other_ip for ip_upper
+      
+      // instanciate other_ip and no_ip for ip_upper
       other_ip[dim] = ip[dim]; 
+      no_ip = false; 
 
       // upper ip
       other_ip[dim] = ip[dim] + 1; 
@@ -127,8 +128,9 @@ void SubDomain::comp_neighbouring_ip(const BorderType borders[DIM][2])
       // calculate new rank for ip_upper
       if (no_ip = true)
 	ip_upper[dim] = -1; 
-      else
+      else 
 	ip_upper[dim] = comp_otherrank(other_ip); 
+
 
       // instanciate other_ip for next loop 
       other_ip[dim] = ip[dim]; 

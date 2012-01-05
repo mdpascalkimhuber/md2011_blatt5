@@ -54,6 +54,17 @@ public:
   virtual void comm1_recv(const int (&cell_pos)[DIM], int orig_sub); 
 
   /**
+   * @brief delete all ghost particles in all border cells after force
+   * calculation 
+   */
+  virtual void delete_ghosts(); 
+
+  /**
+   * @brief delete all ghost particles in the given border cell
+   */
+  virtual void delete_ghosts_cell(const int (&cell_pos)[DIM]); 
+
+  /**
    * @brief calculates the new velocity of the particles
    */
   virtual void comp_F(); 

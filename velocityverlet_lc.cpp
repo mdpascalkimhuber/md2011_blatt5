@@ -310,11 +310,17 @@ void VelocityVerlet_LC::comp_F()
   // initialize potential energy
   W_LC.e_pot = 0; 
 
+  // communication between processes before calculation
+  comm1(); 
+
   // calculate force of every cell
   for (unsigned c_idx = 0; c_idx < W_LC.cells.size(); c_idx++)
     {
       comp_F_cell(c_idx); 
     }
+
+  // delete all ghost particles
+  delete_ghosts(); 
 }
 
 void VelocityVerlet_LC::comp_F_cell(unsigned c_idx)
@@ -710,6 +716,7 @@ void VelocityVerlet_LC::comm1()
 
 	      //receive particle information 
 	      comm1_recv(current_cell, W_LC.s.ip_upper[0]); 
+
 	    }
 	}
     }
@@ -739,6 +746,7 @@ void VelocityVerlet_LC::comm1_send(const int (&cell_pos)[DIM], int dest_sub)
     }
     
   // send to other cell
+  std::cout << "Rank_orig: " << W_LC.s.myrank << " Rank_dest: " << dest_sub << std::endl; 
   MPI::COMM_WORLD.Isend(&size, 1, MPI::INT, dest_sub, 1);
   MPI::COMM_WORLD.Isend(&adapter.front(), size, MPI_Particle, dest_sub, 2);; 
 }
@@ -773,4 +781,77 @@ void VelocityVerlet_LC::comm1_recv(const int (&cell_pos)[DIM], int orig_sub)
       W_LC.cells[global_idx].particles.push_back(*it_p); 
       it_p++; 
     }
+}
+
+void VelocityVerlet_LC::delete_ghosts()
+{
+  // helper variable
+  int loop_idx[DIM]; 
+  int current_cell[DIM]; 
+
+  /*---------------------------------------- step1 (x3) ------------------------------*/
+  for (loop_idx[1] = W_LC.s.ic_start[1]; loop_idx[1] < W_LC.s.ic_stop[1]; loop_idx[1]++) 
+    { // only the inner cells
+      for (loop_idx[0] = W_LC.s.ic_start[0];  loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
+	{ 
+	  // initialize current cell 
+	  for (int dim = 0; dim < DIM; dim++)
+	    current_cell[dim] = loop_idx[dim]; 
+	  
+	  // delete ghost particles of lower border cells
+	  current_cell[2] = 0; 
+	  delete_ghosts_cell(current_cell); 
+
+	  // delete ghost particles of upper border cells
+	  current_cell[2] = W_LC.s.ic_number[2] - 1; 
+	  delete_ghosts_cell(current_cell); 
+	}
+    }
+  
+  /*---------------------------------------- step2 (x2) ------------------------------*/
+  for (loop_idx[2] = 0; loop_idx[2] < W_LC.s.ic_number[2]; loop_idx[2]++)
+    { // all cells in x2 - direction
+      for (loop_idx[0] = W_LC.s.ic_start[0]; loop_idx[0] < W_LC.s.ic_stop[0]; loop_idx[0]++)
+	{
+	  // initialize current cell 
+	  for (int dim = 0; dim < DIM; dim++)
+	    current_cell[dim] = loop_idx[dim]; 
+	  
+	  // delete ghost particles of lower border cells
+	  current_cell[1] = 0; 
+	  delete_ghosts_cell(current_cell); 
+
+	  // delete ghost particles of upper border cells
+	  current_cell[1] = W_LC.s.ic_number[1] - 1; 
+	  delete_ghosts_cell(current_cell); 
+	}
+    }
+
+  /*---------------------------------------- step 3 (x1) ------------------------------*/
+  for (loop_idx[2] = 0; loop_idx[2] < W_LC.s.ic_number[2]; loop_idx[2]++)
+    { // all cells in both directions
+      for (loop_idx[1] = 0; loop_idx[1] < W_LC.s.ic_number[1]; loop_idx[1]++)
+	{
+	  // initialize current cell 
+	  for (int dim = 0; dim < DIM; dim++)
+	    current_cell[dim] = loop_idx[dim]; 
+	  
+	  // delete ghost particles of lower border cells
+	  current_cell[0] = 0; 
+	  delete_ghosts_cell(current_cell); 
+
+	  // delete ghost particles of upper border cells
+	  current_cell[0] = W_LC.s.ic_number[0] - 1; 
+	  delete_ghosts_cell(current_cell); 
+	}
+    }
+}
+
+void VelocityVerlet_LC::delete_ghosts_cell(const int (&cell_pos)[DIM])
+{
+  // calculate global_idx
+  unsigned global_idx = W_LC.compute_global(cell_pos); 
+  
+  // clear particle_list in cell
+  W_LC.cells[global_idx].particles.clear(); 
 }
