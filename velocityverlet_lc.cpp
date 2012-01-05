@@ -320,7 +320,7 @@ void VelocityVerlet_LC::comp_F()
     }
 
   // delete all ghost particles
-  delete_ghosts(); 
+  //  delete_ghosts(); 
 }
 
 void VelocityVerlet_LC::comp_F_cell(unsigned c_idx)
@@ -851,7 +851,7 @@ void VelocityVerlet_LC::delete_ghosts_cell(const int (&cell_pos)[DIM])
 {
   // calculate global_idx
   unsigned global_idx = W_LC.compute_global(cell_pos); 
-  
+  std::cout << global_idx << " "; 
   // clear particle_list in cell
   W_LC.cells[global_idx].particles.clear(); 
 }
