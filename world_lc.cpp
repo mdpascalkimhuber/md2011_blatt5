@@ -119,6 +119,10 @@ void World_LC::read_Parameter(const std::string &filename)
 	}
     }
 
+    // change name of world (add myproc)
+    name += "-"; 
+    name += convertInt(s.myrank); 
+
   // close file
   parfile.close(); 
 
@@ -341,3 +345,12 @@ std::ostream& operator << (std::ostream& os, World_LC& W) {
     os << "Cell_N[" << dim << "]=" << W.cell_N[dim] << " "; 
   return os << std::endl; 
 };
+
+
+// convert an iteger to a string 
+std::string convertInt(int number)
+{
+  std::stringstream ss; //create a stringstream
+  ss << number; //add number to the stream
+  return ss.str(); //return a string with the contents of the stream
+}

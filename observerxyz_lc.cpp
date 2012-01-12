@@ -5,7 +5,7 @@
 ObserverXYZ_LC::ObserverXYZ_LC(World_LC &_W) : Observer(_W), W_LC(_W)
 {
   // open coordinates file (every process has its own .xyz-file
-  std::string coordinates_filename = W.name + W.s.myrank + ".xyz"; 
+  std::string coordinates_filename = _W.name + ".xyz"; 
   //open file, overwrite existing files, take no prisioners
   coordinates_xyz.open(coordinates_filename.c_str()); 
   // and tell the world

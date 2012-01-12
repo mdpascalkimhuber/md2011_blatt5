@@ -90,5 +90,11 @@ public:
   SubDomain s; 
 };
 
+
+// stream operator for World
 std::ostream& operator << (std::ostream& os, World_LC& W);
+
+// convert an int to an stream
+std::string convertInt(int number); 
+
 #endif _WORLD_LC_HPP
