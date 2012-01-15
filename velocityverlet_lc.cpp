@@ -173,6 +173,7 @@ void VelocityVerlet_LC::update_X()
   // initialize helper variables
   int c_idx[DIM]; 
   int new_c_idx; 
+  real cor_x[DIM]; 
 
   // go through (inner) cells and update X!
   for (c_idx[0] = W_LC.s.ic_start[0]; c_idx[0] < W_LC.s.ic_stop[0]; c_idx[0]++)
@@ -190,8 +191,43 @@ void VelocityVerlet_LC::update_X()
   // resort particles, which changed their cell
   while (it_p != W_LC.particles.end())
     {
+
+      // second border_handling (periodic case)
+      for (unsigned dim = 0; dim < DIM; dim++)
+	{
+	  // instanciate cor_x[DIM]
+	  cor_x[dim] = it_p->x[dim] - (real(W_LC.s.ic_lower_global[dim] - W_LC.s.ic_start[dim])*W_LC.s.cellh[dim]); 
+
+	  // check lower border
+	  if ( it_p->x[dim] < 0 )
+	    { // check border_type
+	      switch (W_LC.borders[dim][0])
+		{
+		case periodic: // correct position
+		  {
+		    it_p->x[dim] += W_LC.s.L[dim]; 
+		    break; 
+		  }
+		}
+	    }
+	  
+	  // check upper border
+	  if ( it_p->x[dim] > W_LC.s.L[dim])
+            { // check border_type
+	      switch (W_LC.borders[dim][1])
+		{
+		case periodic: // correct position
+		  {
+		    it_p->x[dim] -= W_LC.s.L[dim]; 
+		    break; 
+		  }
+		}
+	    }
+	}
+      
+      
       // compute global cell_index of new cell
-      new_c_idx = W_LC.compute_cell_index(it_p->x); 
+      new_c_idx = W_LC.compute_cell_index(cor_x); 
       
       // push particle in new cell
       W_LC.cells[new_c_idx].particles.push_back(*it_p); 
@@ -256,7 +292,7 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 		  }
 		case periodic: // correct position
 		  {
-		    it_p->x[dim] += W_LC.s.L[dim]; 
+		    // the positions will be corrected in update_X
 		    break; 
 		  }
 		}
@@ -281,7 +317,7 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 		  }
 		case periodic: // correct position
 		  {
-		    it_p->x[dim] -= W_LC.s.L[dim]; 
+		    // the position will be corrected in update_X
 		    break; 
 		  }
 		}
