@@ -176,7 +176,7 @@ void World_LC::read_Parameter(const std::string &filename)
 	{
 	  left_N -= floor(double(left_N)/(s.N_p[dim] - current_ip) + 0.5); 
 	}
-      s.ic_stop = floor(double(left_N)/(s.N_p[dim] - s.ip[dim]) + 0.5) + s.ic_start[dim]; 
+      s.ic_stop[dim] = floor(double(left_N)/(s.N_p[dim] - s.ip[dim]) + 0.5) + s.ic_start[dim]; 
       // calculate number of cells in subdomain with border_cells
       s.ic_number[dim] = s.ic_stop[dim] + s.ic_start[dim]; 
       // calculate global index of first cell in (inner) subdomain
