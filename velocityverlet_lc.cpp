@@ -313,14 +313,22 @@ void VelocityVerlet_LC::comp_F()
   // communication between processes before calculation
   comm1(); 
 
-  // calculate force of every cell
-  for (unsigned c_idx = 0; c_idx < W_LC.cells.size(); c_idx++)
+  // calculate force of every cell (only inner cells of subdomain)
+  int c_cell[DIM];
+  for (c_cell[0] = W_LC.s.ic_start[0]; c_cell[0] < W_LC.s.ic_stop[0]; c_cell[0]++)
     {
-      comp_F_cell(c_idx); 
+      for (c_cell[1] = W_LC.s.ic_start[1]; c_cell[1] < W_LC.s.ic_stop[1]; c_cell[1]++)
+	{
+	  for (c_cell[2] = W_LC.s.ic_start[2]; c_cell[2] < W_LC.s.ic_stop[2]; c_cell[2]++)
+	    {
+	      // call force calculation in current cell
+	      comp_F_cell(W_LC.compute_global(c_cell)); 
+	    }
+	}
     }
 
   // delete all ghost particles
-  delete_ghosts(); 
+  // delete_ghosts(); 
 }
 
 void VelocityVerlet_LC::comp_F_cell(unsigned c_idx)
