@@ -320,7 +320,7 @@ void VelocityVerlet_LC::comp_F()
     }
 
   // delete all ghost particles
-  //  delete_ghosts(); 
+  delete_ghosts(); 
 }
 
 void VelocityVerlet_LC::comp_F_cell(unsigned c_idx)
