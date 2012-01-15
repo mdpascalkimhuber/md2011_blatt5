@@ -42,6 +42,12 @@ public:
   virtual void comm1(); 
 
   /**
+   * @brief handle communication between subdomains after position
+   * update
+   */
+  virtual void comm2(); 
+
+  /**
    * @brief send particle information of a cell to a destination
    * subdomain  
    */

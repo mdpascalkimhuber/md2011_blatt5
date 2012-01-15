@@ -345,7 +345,8 @@ std::ostream& operator << (std::ostream& os, World_LC& W) {
   os << "t=" << W.t << " delta_t=" << W.delta_t << " t_end=" << W.t_end
      << " Number of Particles=" << W.particles_N 
      << " cell_r_cut=" << W.cell_r_cut
-     << " Number of cells=" << W.cells.size() << std::endl; 
+     << " Number of cells=" << W.cells.size() 
+     << " myrank: " << W.s.myrank << std::endl; 
   
   // give out number of cells in every dimension
   for (unsigned dim = 0; dim < DIM; dim++)

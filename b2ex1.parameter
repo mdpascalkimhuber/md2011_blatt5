@@ -1,6 +1,6 @@
 name b2ex1
 delta_t 0.01
-t_end 2.00
+t_end 3.00
 length 10.0 10.0 10.0
 upper_border leaving leaving leaving
 lower_border leaving leaving leaving
