@@ -45,7 +45,7 @@ unsigned World_LC::compute_cell_index(const real (&pos)[DIM])
   for (unsigned dim = 0; dim < DIM; dim++)
     {
       index *= cell_N[dim]; 
-      index += int(pos[dim]/cell_length[dim]); 
+      index += int(floor(pos[dim]/cell_length[dim])); 
     }
 
   // return value
@@ -261,6 +261,7 @@ void World_LC::read_Particles(const std::string &filename)
       	  // instanciate sub_pos (corrected positions for subdomain)
 	  for (unsigned dim = 0; dim < DIM; dim++) 
 	    { // corrected position: attention to border cells
+		itparticle->x[dim] += 0.001 * s.cellh[dim]; 
 	      sub_pos[dim] = itparticle->x[dim] - (real(s.ic_lower_global[dim] - s.ic_start[dim])*s.cellh[dim]); 
 	    }
 	  
