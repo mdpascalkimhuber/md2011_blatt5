@@ -171,24 +171,30 @@ void VelocityVerlet_LC::update_V()
 void VelocityVerlet_LC::update_X()
 {
   // initialize helper variables
+  int c_idx[DIM]; 
+  int new_c_idx; 
 
-  unsigned c_idx = 0; 
-  
-  // go through cells and update X!
-  for (c_idx = 0; c_idx < W_LC.cells.size(); c_idx++)
+  // go through (inner) cells and update X!
+  for (c_idx[0] = W_LC.s.ic_start[0]; c_idx[0] < W_LC.s.ic_stop[0]; c_idx[0]++)
     {
-      update_X_in(c_idx); 
+      for (c_idx[1] = W_LC.s.ic_start[1]; c_idx[1] < W_LC.s.ic_stop[1]; c_idx[1]++)
+	{
+	  for (c_idx[2] = W_LC.s.ic_start[2]; c_idx[2] < W_LC.s.ic_stop[2]; c_idx[2]++)
+	    {
+	      update_X_in(W_LC.compute_global(c_idx)) ;
+	    }
+	}
     }
-
+  
   std::list<Particle>::iterator it_p = W_LC.particles.begin();
   // resort particles, which changed their cell
   while (it_p != W_LC.particles.end())
     {
       // compute global cell_index of new cell
-      c_idx = W_LC.compute_cell_index(it_p->x); 
+      new_c_idx = W_LC.compute_cell_index(it_p->x); 
       
       // push particle in new cell
-      W_LC.cells[c_idx].particles.push_back(*it_p); 
+      W_LC.cells[new_c_idx].particles.push_back(*it_p); 
 
       // erase particle from particles-vector and increment iterator
       it_p = W_LC.particles.erase(it_p); 
@@ -205,6 +211,9 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
   // initialize bool variable for border_handling
   bool is_leaving = false; 
 
+  // initialize corrected positions of particles
+  real cor_x[DIM]; 
+  
   while (it_p != W_LC.cells[c_idx].particles.end())
     {
       // update position of it_p
@@ -215,10 +224,14 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 
 	  // update F_old
 	  it_p->F_old[dim] = it_p->F[dim]; 
+
+	  // initialize corrected positions of particle it_p
+	  cor_x[dim] = it_p->x[dim] - (real(W_LC.s.ic_lower_global[dim] - W_LC.s.ic_start[dim])*W_LC.s.cellh[dim]); 
 	}
       // initialize bool variable for border_handling
       is_leaving = false; 
       
+            
       //--------------------------------------------------------------------------------
       // border_handling
 
@@ -230,9 +243,10 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
              
 	      switch (W_LC.borders[dim][0])
 		{
-		case unknown: // if borders are unknown...
+		case unknown: // if borders are unknown... (same as leaving)
 		  {
 		    std::cout << "Border (" << dim << ", 0) in unknown." << std::endl; 
+		    is_leaving = true; 
 		    break; 
 		  }
 		case leaving: // set is_leaving=true for later handling
@@ -242,14 +256,14 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 		  }
 		case periodic: // correct position
 		  {
-		    it_p->x[dim] += W_LC.world_size[dim]; 
+		    it_p->x[dim] += W_LC.s.L[dim]; 
 		    break; 
 		  }
 		}
 	    }
 
 	  // check upper border
-	  if ( it_p->x[dim] > W_LC.world_size[dim])
+	  if ( it_p->x[dim] > W_LC.s.L[dim])
             { // check border_type
 	      // std::cout << it_p->id << " RAUS upper" << std::endl;
 	      switch (W_LC.borders[dim][1])
@@ -257,6 +271,7 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 		case unknown: // if borders are unknown...
 		  {
 		    std::cout << "Border (" << dim << ", 1) in unknown." << std::endl; 
+		    is_leaving = true; 
 		    break; 
 		  }
 		case leaving: // set is_leaving=true for later handling
@@ -266,7 +281,7 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
 		  }
 		case periodic: // correct position
 		  {
-		    it_p->x[dim] -= W_LC.world_size[dim]; 
+		    it_p->x[dim] -= W_LC.s.L[dim]; 
 		    break; 
 		  }
 		}
@@ -286,7 +301,7 @@ void VelocityVerlet_LC::update_X_in(unsigned c_idx)
       else
 	{
 	  // if particle changes cell, put it in W_LC.particles
-	  if (W_LC.compute_cell_index(it_p->x) != c_idx)
+	  if (W_LC.compute_cell_index(cor_x) != c_idx)
 	    {
 	      // push_back
 	      W_LC.particles.push_back(*it_p); 
@@ -328,7 +343,7 @@ void VelocityVerlet_LC::comp_F()
     }
 
   // delete all ghost particles
-  // delete_ghosts(); 
+  delete_ghosts(); 
 }
 
 void VelocityVerlet_LC::comp_F_cell(unsigned c_idx)
