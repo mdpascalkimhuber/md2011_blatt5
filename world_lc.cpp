@@ -150,7 +150,9 @@ void World_LC::read_Parameter(const std::string &filename)
   /*--------------------------------------------------------------------------------
     instanciate all variables of the subdomain
     --------------------------------------------------------------------------------*/
-  
+  // helper variable for cell per subdomain calculation
+  int left_N; 
+
   // calculate ip of subdomain
   s.comp_ip(); 
   // calculate other ips
@@ -167,9 +169,14 @@ void World_LC::read_Parameter(const std::string &filename)
       s.cellh[dim] = cell_length[dim]; 
       // set borderwidth of subdomain to 1 as default
       s.ic_start[dim] = int(cell_length[dim]/cell_r_cut); 
-      // calculate ic_stop (no. of cells in subdomain) (the borders of
-      // subdomain are supposed to coincident wiht those of the cells)  
-      s.ic_stop[dim] = int(cell_N[dim]) / s.N_p[dim] + s.ic_start[dim]; 
+      // calculate ic_stop (no. of cells in subdomain) (the number of
+      // cells is not supposed to be a multiple of s.N_p !) 
+      left_N = cell_N[dim]; 
+      for (int current_ip = 0; current_ip < s.ip[dim]; current_ip++)
+	{
+	  left_N -= floor(double(left_N)/(s.N_p[dim] - current_ip) + 0.5); 
+	}
+      s.ic_stop = floor(double(left_N)/(s.N_p[dim] - s.ip[dim]) + 0.5) + s.ic_start[dim]; 
       // calculate number of cells in subdomain with border_cells
       s.ic_number[dim] = s.ic_stop[dim] + s.ic_start[dim]; 
       // calculate global index of first cell in (inner) subdomain
